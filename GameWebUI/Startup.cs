@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using GameLogic;
+using GameWebUI.Service;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Hosting;
@@ -27,6 +29,9 @@ namespace GameWebUI
         {
             services.AddRazorPages();
             services.AddServerSideBlazor();
+
+            services.AddScoped<IHardware, HardwareEmulator>();
+            services.AddScoped<AppState>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

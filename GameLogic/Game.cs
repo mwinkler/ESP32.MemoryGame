@@ -37,6 +37,11 @@ namespace GameLogic
             // reset
             Solution = new ArrayList();
             PlayerPosition = 0;
+
+            for (int i = 0; i < LedCount; i++)
+            {
+                Hardware.SetLed(i, true);
+            }
         }
     }
 }
