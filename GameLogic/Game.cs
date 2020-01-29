@@ -24,7 +24,7 @@ namespace GameLogic
             LedCount = ledCount;
 
             // register button change event
-            hardware.OnButtonStateChanged(OnButtonStateChanged);
+            hardware.OnButtonStateChanged += OnButtonStateChanged;
         }
 
         private void OnButtonStateChanged(int index, bool state)

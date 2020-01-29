@@ -7,6 +7,7 @@ namespace GameLogic
     public interface IHardware
     {
         void SetLed(int index, bool state);
-        void OnButtonStateChanged(ButtonTriggerEvent callback);
+
+        event ButtonTriggerEvent OnButtonStateChanged;
     }
 }
