@@ -21,11 +21,25 @@ namespace GameWebUI.Pages
 
         private async Task Start()
         {
-            Game = new Game(Hardware, State.Leds.Count);
+            // exit if game instance already created
+            if (Game != null)
+            {
+                return;
+            }
 
+            var settings = new Settings
+            {
+                LedCount = State.Leds.Count,
+                TickInterval = TimeSpan.FromMilliseconds(100)
+            };
+
+            // create game instance
+            Game = new Game(Hardware, settings);
+
+            // run game in new thread
             await Task.Run(() => 
             {
-                Game.Start();
+                Game.Run();
             });
         }
     }

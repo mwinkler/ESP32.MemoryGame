@@ -7,10 +7,7 @@
   <ItemGroup>
     <Compile Include="..\GameLogic\Game.cs" Link="GameLogic\Game.cs" />
     <Compile Include="..\GameLogic\IHardware.cs" Link="GameLogic\IHardware.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="GameLogic\" />
+    <Compile Include="..\GameLogic\Settings.cs" Link="GameLogic\Settings.cs" />
   </ItemGroup>
 
 </Project>
