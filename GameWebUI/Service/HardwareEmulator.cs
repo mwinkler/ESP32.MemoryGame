@@ -21,6 +21,8 @@ namespace GameWebUI.Service
         public void SetLed(int index, bool state)
         {
             AppState.Leds[index].State = state;
+
+            AppState.StateHasChanged();
         }
     }
 }

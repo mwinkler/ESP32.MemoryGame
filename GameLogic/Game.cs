@@ -8,10 +8,11 @@ namespace GameLogic
     {
         private enum State
         {
+            IDLE,
             RESET,
             SHOW_SOLUTION,
             //SHOW_SOLUTION_WAIT,
-            PLAYER_INPUT
+            PLAYER_INPUT,
         }
         
         private readonly IHardware Hardware;
@@ -21,6 +22,7 @@ namespace GameLogic
         private bool IsRunning;
         private ArrayList Solution;
         private int CurrentPosition;
+        private string LastLogMessage;
 
         public Game(IHardware hardware, Settings settings)
         {
@@ -34,11 +36,13 @@ namespace GameLogic
 
         private void OnButtonStateChanged(int index, bool state)
         {
-            Console.WriteLine($"[ButtonStateChanged] index: {index}, state: {state}");
+            Log($"[Game.ButtonStateChanged] index: {index}, state: {state}");
         }
 
         public void Run()
         {
+            Log("[Game.Run]");
+
             // check if game is already running
             if (IsRunning)
             {
@@ -47,7 +51,7 @@ namespace GameLogic
 
             // set states
             IsRunning = true;
-            CurrentState = State.RESET;
+            CurrentState = State.IDLE;
 
             // game loop
             while (true)
@@ -66,8 +70,17 @@ namespace GameLogic
             }
         }
 
+        public void Reset()
+        {
+            Log("[Game.Reset]");
+
+            CurrentState = State.RESET;
+        }
+
         public void Stop()
         {
+            Log("[Game.Stop]");
+
             IsRunning = false;
         }
 
@@ -75,10 +88,18 @@ namespace GameLogic
         {
             switch (CurrentState)
             {
+                // do nothing
+                case State.IDLE:
+
+                    Log("[Game.Tick] Idle");
+
+                    break;
+
+
                 // reset game to inital state
                 case State.RESET:
 
-                    Console.WriteLine($"[Tick] Reset game");
+                    Log("[Game.Tick] Reset game");
 
                     Solution = new ArrayList();
                     CurrentPosition = 0;
@@ -97,10 +118,11 @@ namespace GameLogic
 
                     break;
 
+
                 // game is presenting the solution to player
                 case State.SHOW_SOLUTION:
 
-                    Console.WriteLine($"[Tick] Show solution");
+                    Log("[Game.Tick] Show solution");
 
                     for (var step = 0; step < Solution.Count; step++)
                     {
@@ -122,7 +144,12 @@ namespace GameLogic
 
                     break;
 
+
+                // wait for player input
                 case State.PLAYER_INPUT:
+
+                    Log("[Game.Tick] Player input");
+
                     break;
             }
         }
@@ -133,6 +160,20 @@ namespace GameLogic
             {
                 Hardware.SetLed(i, state);
             }
+        }
+
+        private void Log(string message)
+        {
+            if (message == LastLogMessage)
+            {
+                Console.Write(".");
+            }
+            else
+            {
+                Console.Write("\n" + message);
+            }
+
+            LastLogMessage = message;
         }
     }
 }

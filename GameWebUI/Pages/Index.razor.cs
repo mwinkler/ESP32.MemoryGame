@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace GameWebUI.Pages
 {
-    public partial class Index
+    public partial class Index : IDisposable
     {
         [Inject]
         private AppState State { get; set; }
@@ -19,28 +19,42 @@ namespace GameWebUI.Pages
 
         private Game Game { get; set; }
 
-        private async Task Start()
+        public void Dispose()
         {
-            // exit if game instance already created
             if (Game != null)
             {
-                return;
+                Game.Stop();
             }
+        }
 
+        protected override void OnInitialized()
+        {
+            State.StateHasChanged = () => InvokeAsync(StateHasChanged);
+
+            // settings
             var settings = new Settings
             {
                 LedCount = State.Leds.Count,
-                TickInterval = TimeSpan.FromMilliseconds(100)
+                TickInterval = TimeSpan.FromMilliseconds(100),
+                MinimumSolutionSteps = 3,
+                RandomSeed = (int)DateTime.Now.Ticks,
+                StepDuration = TimeSpan.FromSeconds(1),
+                StepInterval = TimeSpan.FromMilliseconds(250)
             };
 
             // create game instance
             Game = new Game(Hardware, settings);
 
             // run game in new thread
-            await Task.Run(() => 
+            Task.Run(() =>
             {
                 Game.Run();
             });
+        }
+
+        private void Start()
+        {
+            Game.Reset();
         }
     }
 }

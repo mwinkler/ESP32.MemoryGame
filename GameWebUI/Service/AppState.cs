@@ -8,6 +8,8 @@ namespace GameWebUI.Service
 {
     public class AppState
     {
+        public Action StateHasChanged { get; set; }
+
         public AppState()
         {
             Leds = new[]
