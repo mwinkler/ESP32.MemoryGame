@@ -15,9 +15,13 @@ namespace GameWebUI.Pages
 
         private Game Game;
 
+        public string Score { get; set; }
+
         public void Dispose() => Game?.Stop();
 
         #region IHardware
+
+        public event ButtonTriggerEvent OnButtonStateChanged;
 
         public void SetLeds(bool[] states)
         {
@@ -29,7 +33,12 @@ namespace GameWebUI.Pages
             InvokeAsync(StateHasChanged);
         }
 
-        public event ButtonTriggerEvent OnButtonStateChanged;
+        public void DisplayScore(int count)
+        {
+            Score = $"Score: {count}";
+
+            InvokeAsync(StateHasChanged);
+        }
 
         #endregion
 

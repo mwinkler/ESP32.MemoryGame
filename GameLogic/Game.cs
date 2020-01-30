@@ -47,8 +47,8 @@ namespace GameLogic
 
                     SetLed(button, down);
 
-                    // button down
-                    if (down)
+                    // button up
+                    if (!down)
                     {
                         var expectedButton = (int)Solution[CurrentPosition];
 
@@ -58,20 +58,19 @@ namespace GameLogic
                         if (expectedButton == button)
                         {
                             CurrentPosition++;
+
+                            // player has pressed all buttons correctly
+                            if (CurrentPosition >= Solution.Count)
+                            {
+                                Hardware.DisplayScore(Solution.Count);
+
+                                CurrentPosition = 0;
+                                CurrentState = State.SHOW_NEXT_SOLUTION;
+                            }
                         }
                         else
                         {
                             CurrentState = State.PLAYER_MISTAKE;
-                        }
-                    }
-
-                    // button up
-                    else
-                    {
-                        if (CurrentPosition >= Solution.Count)
-                        {
-                            CurrentPosition = 0;
-                            CurrentState = State.SHOW_NEXT_SOLUTION;
                         }
                     }
 

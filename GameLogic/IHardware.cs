@@ -9,5 +9,7 @@ namespace GameLogic
         void SetLeds(bool[] states);
 
         event ButtonTriggerEvent OnButtonStateChanged;
+
+        void DisplayScore(int count);
     }
 }
