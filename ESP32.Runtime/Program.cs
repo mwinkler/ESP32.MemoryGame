@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading;
 
-namespace Runtime
+namespace ESP32.Runtime
 {
     public class Program
     {

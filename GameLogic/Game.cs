@@ -11,13 +11,15 @@ namespace GameLogic
             IDLE,
             RESET,
             SHOW_SOLUTION,
-            //SHOW_SOLUTION_WAIT,
+            SHOW_NEXT_SOLUTION,
             PLAYER_INPUT,
+            PLAYER_MISTAKE
         }
         
         private readonly IHardware Hardware;
         private readonly Settings Settings;
         private readonly Random Rnd;
+        private readonly bool[] Leds;
         private State CurrentState;
         private bool IsRunning;
         private ArrayList Solution;
@@ -29,14 +31,52 @@ namespace GameLogic
             Hardware = hardware;
             Settings = settings;
             Rnd = new Random(settings.RandomSeed);
+            Leds = new bool[settings.LedCount];
 
             // register button change event
             hardware.OnButtonStateChanged += OnButtonStateChanged;
         }
 
-        private void OnButtonStateChanged(int index, bool state)
+        private void OnButtonStateChanged(int button, bool down)
         {
-            Log($"[Game.ButtonStateChanged] index: {index}, state: {state}");
+            Log($"[Game.ButtonStateChanged] button: {button}, down: {down}");
+
+            switch (CurrentState)
+            {
+                case State.PLAYER_INPUT:
+
+                    SetLed(button, down);
+
+                    // button down
+                    if (down)
+                    {
+                        var expectedButton = (int)Solution[CurrentPosition];
+
+                        Log($"[Game.ButtonStateChanged] Button pressed -> player: {button}, expected: {expectedButton}");
+
+                        // check if correct button pressed
+                        if (expectedButton == button)
+                        {
+                            CurrentPosition++;
+                        }
+                        else
+                        {
+                            CurrentState = State.PLAYER_MISTAKE;
+                        }
+                    }
+
+                    // button up
+                    else
+                    {
+                        if (CurrentPosition >= Solution.Count)
+                        {
+                            CurrentPosition = 0;
+                            CurrentState = State.SHOW_NEXT_SOLUTION;
+                        }
+                    }
+
+                    break;
+            }
         }
 
         public void Run()
@@ -105,10 +145,7 @@ namespace GameLogic
                     CurrentPosition = 0;
 
                     // create inital solution for game
-                    for (int i = 0; i < Settings.MinimumSolutionSteps; i++)
-                    {
-                        Solution.Add(Rnd.Next(Settings.LedCount - 1));
-                    }
+                    AddSolution(Settings.MinimumSolutionSteps);
 
                     // disable leds
                     SetLeds(false);
@@ -124,22 +161,8 @@ namespace GameLogic
 
                     Log("[Game.Tick] Show solution");
 
-                    for (var step = 0; step < Solution.Count; step++)
-                    {
-                        // wait step interval
-                        Thread.Sleep(Settings.StepInterval);
-                        
-                        // disable all leds
-                        SetLeds(false);
+                    ShowSolution(0);
 
-                        // enable led of current solution step
-                        Hardware.SetLed((int)Solution[step], true);
-
-                        // wait for current step duration
-                        Thread.Sleep(Settings.StepDuration);
-                    }
-
-                    // next step
                     CurrentState = State.PLAYER_INPUT;
 
                     break;
@@ -151,15 +174,77 @@ namespace GameLogic
                     Log("[Game.Tick] Player input");
 
                     break;
+
+
+                // player press wrong button
+                case State.PLAYER_MISTAKE:
+
+                    Log("[Game.Tick] Player mistake");
+
+                    break;
+
+
+                // show next solution
+                case State.SHOW_NEXT_SOLUTION:
+
+                    Log("[Game.Tick] Show next solution");
+
+                    AddSolution(1);
+
+                    ShowSolution(Solution.Count - 1);
+
+                    CurrentState = State.PLAYER_INPUT;
+
+                    break;
+
+
             }
+        }
+
+        private void AddSolution(int count)
+        {
+            for (int i = 0; i < count; i++)
+            {
+                Solution.Add(Rnd.Next(Settings.LedCount - 1));
+            }
+        }
+
+        private void ShowSolution(int startIndex)
+        {
+            for (var step = startIndex; step < Solution.Count; step++)
+            {
+                // turn off leds
+                SetLeds(false);
+
+                // wait step interval
+                Thread.Sleep(Settings.StepInterval);
+
+                // enable led of current solution step
+                SetLed((int)Solution[step], true);
+
+                // wait for current step duration
+                Thread.Sleep(Settings.StepDuration);
+            }
+
+            // turn off leds
+            SetLeds(false);
+        }
+
+        private void SetLed(int index, bool state)
+        {
+            Leds[index] = state;
+
+            Hardware.SetLeds(Leds);
         }
 
         private void SetLeds(bool state)
         {
             for (int i = 0; i < Settings.LedCount; i++)
             {
-                Hardware.SetLed(i, state);
+                Leds[i] = state;
             }
+
+            Hardware.SetLeds(Leds);
         }
 
         private void Log(string message)

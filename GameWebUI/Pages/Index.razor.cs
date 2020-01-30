@@ -19,9 +19,12 @@ namespace GameWebUI.Pages
 
         #region IHardware
 
-        public void SetLed(int index, bool state)
+        public void SetLeds(bool[] states)
         {
-            LedButtons[index].State = state;
+            for (int i = 0; i < LedButtons.Count; i++)
+            {
+                LedButtons[i].State = states[i];
+            }
 
             InvokeAsync(StateHasChanged);
         }
@@ -32,6 +35,7 @@ namespace GameWebUI.Pages
 
         protected override void OnInitialized()
         {
+            // ui settings
             LedButtons = new[]
             {
                 new LedButton { Index = 0, State = false, Color = "red" },
@@ -40,7 +44,7 @@ namespace GameWebUI.Pages
                 new LedButton { Index = 3, State = false, Color = "yellow" },
             };
 
-            // settings
+            // game settings
             var settings = new Settings
             {
                 LedCount = LedButtons.Count,
@@ -62,5 +66,7 @@ namespace GameWebUI.Pages
         }
 
         private void Press(int index, bool state) => OnButtonStateChanged?.Invoke(index, state);
+
+        
     }
 }
