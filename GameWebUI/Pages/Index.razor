@@ -1,11 +1,10 @@
 ﻿@page "/"
 
-
-@foreach (var led in State.Leds)
+@foreach (var led in LedButtons)
 {
-    <div class="led @(led.State ? "on" : "off")" style="background-color: @led.Color;"></div>
+    <div class="led @(led.State ? "on" : "off")" style="background-color: @led.Color;" @onmousedown="() => Press(led.Index, true)" @onmouseup="() => Press(led.Index, false)"></div>
 }
 
 <div>
-    <button @onclick="Start">Start</button>
+    <button @onclick="Game.Reset">Restart</button>
 </div>

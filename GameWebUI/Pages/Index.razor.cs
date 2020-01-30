@@ -1,40 +1,49 @@
-﻿using GameLogic;
-using GameWebUI.Service;
-using Microsoft.AspNetCore.Components;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Components;
+using GameLogic;
+using GameWebUI.Model;
 
 namespace GameWebUI.Pages
 {
-    public partial class Index : IDisposable
+    public partial class Index : IDisposable, IHardware
     {
-        [Inject]
-        private AppState State { get; set; }
+        private IList<LedButton> LedButtons;
 
-        [Inject]
-        private IHardware Hardware { get; set; }
+        private Game Game;
 
-        private Game Game { get; set; }
+        public void Dispose() => Game?.Stop();
 
-        public void Dispose()
+        #region IHardware
+
+        public void SetLed(int index, bool state)
         {
-            if (Game != null)
-            {
-                Game.Stop();
-            }
+            LedButtons[index].State = state;
+
+            InvokeAsync(StateHasChanged);
         }
+
+        public event ButtonTriggerEvent OnButtonStateChanged;
+
+        #endregion
 
         protected override void OnInitialized()
         {
-            State.StateHasChanged = () => InvokeAsync(StateHasChanged);
+            LedButtons = new[]
+            {
+                new LedButton { Index = 0, State = false, Color = "red" },
+                new LedButton { Index = 1, State = false, Color = "green" },
+                new LedButton { Index = 2, State = false, Color = "blue" },
+                new LedButton { Index = 3, State = false, Color = "yellow" },
+            };
 
             // settings
             var settings = new Settings
             {
-                LedCount = State.Leds.Count,
+                LedCount = LedButtons.Count,
                 TickInterval = TimeSpan.FromMilliseconds(100),
                 MinimumSolutionSteps = 3,
                 RandomSeed = (int)DateTime.Now.Ticks,
@@ -43,7 +52,7 @@ namespace GameWebUI.Pages
             };
 
             // create game instance
-            Game = new Game(Hardware, settings);
+            Game = new Game(this, settings);
 
             // run game in new thread
             Task.Run(() =>
@@ -52,9 +61,6 @@ namespace GameWebUI.Pages
             });
         }
 
-        private void Start()
-        {
-            Game.Reset();
-        }
+        private void Press(int index, bool state) => OnButtonStateChanged?.Invoke(index, state);
     }
 }
