@@ -160,7 +160,7 @@ namespace GameLogic
 
                     Log("[Game.Tick] Show solution");
 
-                    ShowSolution(0);
+                    ShowSolution(0, false);
 
                     CurrentState = State.PLAYER_INPUT;
 
@@ -188,9 +188,16 @@ namespace GameLogic
 
                     Log("[Game.Tick] Show next solution");
 
+                    Thread.Sleep(Settings.WaitBeforeShowNextSolution);
+
+                    if (Settings.Replay)
+                    {
+                        ShowSolution(0, true);
+                    }
+
                     AddSolution(1);
 
-                    ShowSolution(Solution.Count - 1);
+                    ShowSolution(Solution.Count - 1, false);
 
                     CurrentState = State.PLAYER_INPUT;
 
@@ -208,7 +215,7 @@ namespace GameLogic
             }
         }
 
-        private void ShowSolution(int startIndex)
+        private void ShowSolution(int startIndex, bool replay)
         {
             for (var step = startIndex; step < Solution.Count; step++)
             {
@@ -216,13 +223,13 @@ namespace GameLogic
                 SetLeds(false);
 
                 // wait step interval
-                Thread.Sleep(Settings.StepInterval);
+                Thread.Sleep(replay ? Settings.ReplayInterval : Settings.StepInterval);
 
                 // enable led of current solution step
                 SetLed((int)Solution[step], true);
 
                 // wait for current step duration
-                Thread.Sleep(Settings.StepDuration);
+                Thread.Sleep(replay ? Settings.ReplayDuration : Settings.StepDuration);
             }
 
             // turn off leds

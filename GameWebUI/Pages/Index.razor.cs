@@ -61,7 +61,11 @@ namespace GameWebUI.Pages
                 MinimumSolutionSteps = 3,
                 RandomSeed = (int)DateTime.Now.Ticks,
                 StepDuration = TimeSpan.FromSeconds(1),
-                StepInterval = TimeSpan.FromMilliseconds(250)
+                StepInterval = TimeSpan.FromMilliseconds(250),
+                Replay = true,
+                ReplayDuration = TimeSpan.FromMilliseconds(250),
+                ReplayInterval = TimeSpan.FromMilliseconds(125),
+                WaitBeforeShowNextSolution = TimeSpan.FromMilliseconds(1000)
             };
 
             // create game instance
